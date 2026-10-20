@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "代理时区助手",
+  "version": "0.2.0",
+  "description": "查询出口 IP 的时区，并按站点自动应用 Chrome 原生时区设置。",
+  "minimum_chrome_version": "125",
+  "permissions": ["debugger", "storage", "alarms", "activeTab", "tabs", "webNavigation"],
+  "host_permissions": ["https://ipwho.is/*"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": { "default_popup": "popup.html", "default_title": "代理时区助手" }
+}
