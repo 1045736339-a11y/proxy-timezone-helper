@@ -1,0 +1,9 @@
+{
+  "name": "proxy-timezone-helper",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-isolation=none tests/core.test.mjs tests/background.test.mjs tests/auto.test.mjs",
+    "test:browser": "node tests/browser-smoke.mjs"
+  }
+}
