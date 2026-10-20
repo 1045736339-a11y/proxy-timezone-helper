@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>代理时区</title>
+  <link rel="stylesheet" href="popup.css">
+  <script src="popup.js" defer></script>
+</head>
+<body>
+<main>
+  <header class="header">
+    <div><p class="eyebrow">PROXY TIMEZONE</p><h1>让当前页使用代理时区</h1></div>
+    <span class="badge" id="badge">读取中</span>
+  </header>
+  <p class="intro">查询代理出口 IP 的 IANA 时区，再应用到当前标签。</p>
+  <p class="current-page" id="current-page">正在读取当前标签…</p>
+  <p class="auto-state" id="auto-state" hidden></p>
+  <section class="card activation" aria-label="启动方式">
+    <h2>启动方式</h2>
+    <div class="mode-options">
+      <label class="mode"><input type="radio" name="activation" value="manual"><span><strong>手动</strong><small>每次点击后应用</small></span></label>
+      <label class="mode"><input type="radio" name="activation" value="sites"><span><strong>指定网站</strong><small>进入匹配网站时自动启用</small></span></label>
+      <label class="mode"><input type="radio" name="activation" value="all"><span><strong>所有网站</strong><small>每个普通网页都自动启用</small></span></label>
+    </div>
+    <div id="site-settings" hidden>
+      <label for="sites" class="input-label">站点规则（每行一条）</label>
+      <textarea id="sites" rows="5" spellcheck="false" placeholder="chatgpt.com&#10;*.openai.com&#10;https://claude.ai/*"></textarea>
+      <div class="site-actions">
+        <button id="add-current-site" class="secondary" type="button">添加当前网站</button>
+        <button id="save-sites" class="secondary" type="button">保存规则</button>
+      </div>
+      <p class="meta">example.com 只匹配该主机；*.example.com 同时匹配主域和子域。也可写 https://example.com/path/*。</p>
+    </div>
+    <div id="auto-options">
+      <label class="check auto-choice"><input id="auto-reload" type="checkbox"><span>首次进入自动刷新一次<span class="hint">保证首屏脚本使用新时区；会丢失未保存的编辑内容。</span></span></label>
+      <label class="check auto-choice"><input id="restore-on-leave" type="checkbox"><span>离开站点后恢复<span class="hint">只对自动启用的标签生效。</span></span></label>
+      <label class="check auto-choice"><input id="skip-when-local" type="checkbox"><span>出口时区与本机相同时不启用<span class="hint">没有代理或出口同时区时保持浏览器原样。</span></span></label>
+    </div>
+  </section>
+  <section class="actions" aria-label="应用时区">
+    <button id="detect-apply" class="primary" type="button">查询出口并应用</button>
+    <label class="check refresh-choice"><input id="refresh" type="checkbox"><span>应用后刷新当前页<span class="hint">会丢失未保存的编辑内容</span></span></label>
+    <button id="detect" class="secondary" type="button">只查询出口</button>
+  </section>
+  <p class="message" id="message" role="status" aria-live="polite" hidden></p>
+  <p class="reload-notice" id="reload-notice" hidden>时区已更新。页面中已有的日期或时区缓存可能需要刷新后才会变化。</p>
+  <section class="card" aria-label="时区状态">
+    <div class="card-heading"><h2>当前状态</h2><span id="applied-at" class="meta"></span></div>
+    <dl class="facts">
+      <div><dt>本页设置</dt><dd id="configured-timezone">—</dd></div>
+      <div><dt>页面实测</dt><dd id="actual-timezone">—</dd></div>
+      <div><dt>当前偏移</dt><dd id="actual-offset">—</dd></div>
+      <div><dt>1 月 / 7 月偏移</dt><dd id="season-offsets">—</dd></div>
+    </dl>
+    <p id="verified-at" class="meta verified-at" hidden></p>
+    <div class="button-row"><button id="verify" class="secondary" type="button">验证当前页</button><button id="stop" class="quiet" type="button">恢复当前页</button></div>
+    <p id="warnings" class="warning" hidden></p>
+  </section>
+  <section class="card" aria-label="代理出口信息">
+    <h2>最近查询的出口</h2>
+    <dl class="facts">
+      <div><dt>IP</dt><dd id="detected-ip">尚未查询</dd></div>
+      <div><dt>位置</dt><dd id="detected-location">—</dd></div>
+      <div><dt>时区</dt><dd id="detected-timezone">—</dd></div>
+      <div><dt>查询时间</dt><dd id="detected-at">—</dd></div>
+    </dl>
+    <p id="lookup-error" class="warning" hidden></p>
+    <label class="check auto-choice"><input id="auto-sync" type="checkbox"><span>每 5 分钟检查出口<span class="hint">仅更新已启用标签。出口变化后需自行刷新页面。</span></span></label>
+  </section>
+  <details class="manual">
+    <summary>手动填写 IANA 时区</summary>
+    <label for="manual-timezone" class="input-label">IANA 时区名称</label>
+    <input id="manual-timezone" type="text" placeholder="输入完整时区名称" spellcheck="false" autocomplete="off" aria-describedby="manual-help">
+    <p class="meta" id="manual-help">填写地区/城市格式的时区名称。系统会检查是否有效。</p>
+    <button id="manual-apply" class="secondary" type="button">应用手动时区</button>
+  </details>
+  <footer>
+    <p>“指定网站”只对匹配规则的站点自动启用；离开后默认恢复。首次进入可能自动刷新一次，可在上方关闭。</p>
+    <p>自动模式会让 Chrome 显示“正在调试此浏览器”的提示，这是原生时区功能的要求。ipwho.is 和目标网站需要走同一路代理，否则查询结果可能不同。</p>
+    <p>所有已启用标签共用一个时区；时区一致不能保证解决网页加载或登录问题。</p>
+  </footer>
+</main>
+</body>
+</html>
