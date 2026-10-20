@@ -4,6 +4,8 @@
 
 按出口 IP 查询 IANA 时区，再调用 Chrome 的原生时区设置。它会让已启用标签中的常见 Date 和 Intl 接口使用这个时区。电脑时区不变，UTC 时间戳也不应改变。
 
+反馈邮箱:hachiikawa@foxmail.com
+
 ## 安装
 
 1. 解压安装包。
