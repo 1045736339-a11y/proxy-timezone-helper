@@ -1,0 +1,6 @@
+.tmp/
+node_modules/
+dist/
+test-artifacts/
+proxy-timezone-extension/browser-smoke-report.json
+proxy-timezone-extension/shell-write.txt
